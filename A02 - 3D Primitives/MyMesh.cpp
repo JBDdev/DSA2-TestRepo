@@ -1,4 +1,5 @@
 #include "MyMesh.h"
+#include <iostream>
 void MyMesh::Init(void)
 {
 	m_bBinded = false;
@@ -483,7 +484,7 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 	*/
 
 	std::vector<vector3> vertices;
-
+	int debug = 0;
 	float x, y, z;
 	float xy;
 	
@@ -493,25 +494,28 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 	float longitudeStep = PI / a_nSubdivisions;
 	float latitudeStep = (2 * PI) / a_nSubdivisions;
 
-	for (int i = 0; i <= a_nSubdivisions + 1; i++) 
+	for (int i = 0; i <= a_nSubdivisions; ++i) 
 	{
 		phi = (PI / 2) - (i * longitudeStep);
 		xy = a_fRadius * cosf(phi);
 		z = a_fRadius * sinf(phi);
 
-		for (int j = 0; j <= a_nSubdivisions; j++) 
+		for (int j = 0; j <= a_nSubdivisions; ++j) 
 		{
 			theta = j * latitudeStep;
 
 			x = xy * cosf(theta);
 			y = xy * sinf(theta);
 			vertices.push_back(vector3(x, y, z));
+			debug++;
 		}
 	}
 
+	std::cout << "Added " << debug << " vertices to vector!" << std::endl;
+
 	//Generating the triangles
 	int vIndex1, vIndex2;
-
+	debug = 0;
 	for (int i = 0; i < a_nSubdivisions; i++) 
 	{
 		vIndex1 = i * (a_nSubdivisions + 1);
@@ -523,25 +527,22 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 			vIndex2++;
 
 			//2 Triangles per quad
-			if (i == a_nSubdivisions - 1)
-			{
-				if (i != 0)
-					AddTri(vertices[vIndex1], vertices[vIndex2], vertices[vIndex1 - a_nSubdivisions]);
-				if (i != (a_nSubdivisions - 1))
-					AddTri(vertices[vIndex1 - a_nSubdivisions], vertices[vIndex2], vertices[vIndex2 -a_nSubdivisions]);
-			}
-			else 
-			{
-				if (i != 0)
-					AddTri(vertices[vIndex1], vertices[vIndex2], vertices[vIndex1 + 1]);
 
-				if (i != (a_nSubdivisions - 1))
-					AddTri(vertices[vIndex1 + 1], vertices[vIndex2], vertices[vIndex2 + 1]);
-			}
+			if (i != 0)
+				AddTri(vertices[vIndex1], vertices[vIndex2], vertices[vIndex1 + 1]);
+
+			if (i != (a_nSubdivisions - 1))
+				AddTri(vertices[vIndex1 + 1], vertices[vIndex2], vertices[vIndex2 + 1]);
+			debug++;
 		}
-		
+		AddTri(vertices[vIndex1], vertices[vIndex2], vertices[vIndex1 - a_nSubdivisions + 1]);
+		AddTri(vertices[vIndex1 - a_nSubdivisions + 1], vertices[vIndex2], vertices[vIndex2 - a_nSubdivisions + 1]);
+
 
 	}
+
+
+	std::cout << debug << " sets of triangles created!" << std::endl;
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
