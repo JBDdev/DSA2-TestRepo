@@ -275,9 +275,29 @@ void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions,
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	//Reusing the code from E04 Circle Creation will help create the circular face
+	vector3 bottomRightPt;
+	vector3 topLeftPt;
+
+	vector3 centerPt = vector3(0, 0, 0); 
+	vector3 coneTip = vector3(0, 0, a_fHeight);
+
+	float theta = (PI * 2.0f) / a_nSubdivisions;
+
+	//This will iterate for each point generated. bottomRightPt represents the current working point in this case, while topRightPt is the next point in the sequence
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		bottomRightPt = vector3((a_fRadius * cos(theta * i)), (a_fRadius * sin(theta * i)), 0);
+
+		topLeftPt = vector3((a_fRadius * cos(theta * (i + 1))), (a_fRadius * sin(theta * (i + 1))), 0);
+
+		//AddTri(centerPt, bottomRightPt, topLeftPt);
+		AddTri(topLeftPt, bottomRightPt, centerPt);
+
+		//For the outward cone tris, we draw from the tip of the cone instead of from the center of the circle
+
+		AddTri(coneTip, bottomRightPt, topLeftPt);
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
@@ -299,9 +319,38 @@ void MyMesh::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubdivisi
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	//BC -> Bottom Circle    TC -> Top Circle
+
+	vector3 bottomRightPtBC;
+	vector3 topLeftPtBC;
+
+	vector3 bottomRightPtTC;
+	vector3 topLeftPtTC;
+
+	vector3 centerPtBC = vector3(0, 0, -a_fHeight/2); 
+	vector3 centerPtTC = vector3(0, 0, (a_fHeight/2));
+
+	float theta = (PI * 2.0f) / a_nSubdivisions;
+
+	//This will iterate for each point generated. bottomRightPt represents the current working point in this case, while topRightPt is the next point in the sequence
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		//Bottom Circle Tri
+		bottomRightPtBC = vector3((a_fRadius * cos(theta * i)), (a_fRadius * sin(theta * i)), -(a_fHeight / 2));
+		topLeftPtBC = vector3((a_fRadius * cos(theta * (i + 1))), (a_fRadius * sin(theta * (i + 1))), (-a_fHeight / 2));
+
+		AddTri(topLeftPtBC, bottomRightPtBC, centerPtBC);
+
+		//Top Circle Tri
+		bottomRightPtTC = vector3((a_fRadius * cos(theta * i)), (a_fRadius * sin(theta * i)), a_fHeight / 2);
+		topLeftPtTC = vector3((a_fRadius * cos(theta * (i + 1))), (a_fRadius * sin(theta * (i + 1))), a_fHeight / 2);
+
+		AddTri(centerPtTC, bottomRightPtTC, topLeftPtTC);
+
+		AddQuad(bottomRightPtBC, topLeftPtBC, bottomRightPtTC, topLeftPtTC);
+	}
+
+
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
@@ -329,9 +378,46 @@ void MyMesh::GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fH
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	vector3 bottomRightPtBC;
+	vector3 topLeftPtBC;
+	vector3 bottomLeftPtBC;
+	vector3 topRightPtBC;
+
+	vector3 bottomRightPtTC;
+	vector3 topLeftPtTC;
+	vector3 bottomLeftPtTC;
+	vector3 topRightPtTC;
+
+	vector3 centerPtBC = vector3(0, 0, -a_fHeight / 2);
+	vector3 centerPtTC = vector3(0, 0, (a_fHeight / 2));
+
+	float theta = (PI * 2.0f) / a_nSubdivisions;
+
+	//This will iterate for each point generated. bottomRightPt represents the current working point in this case, while topRightPt is the next point in the sequence
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		//Bottom Circle Tri
+		bottomRightPtBC = vector3((a_fOuterRadius * cos(theta * i)), (a_fOuterRadius * sin(theta * i)), -(a_fHeight / 2));
+		bottomLeftPtBC = vector3((a_fInnerRadius * cos(theta * (i + 1))), (a_fInnerRadius * sin(theta * (i + 1))), -(a_fHeight / 2));
+		topLeftPtBC = vector3((a_fOuterRadius * cos(theta * (i + 1))), (a_fOuterRadius * sin(theta * (i + 1))), (-a_fHeight / 2));
+		topRightPtBC = vector3((a_fInnerRadius * cos(theta * i)), (a_fInnerRadius * sin(theta * i)), -(a_fHeight / 2));
+
+		AddTri(topLeftPtBC, bottomRightPtBC, bottomLeftPtBC);
+		AddTri(topRightPtBC, bottomLeftPtBC, bottomRightPtBC);
+
+		//Top Circle Tri
+		bottomRightPtTC = vector3((a_fOuterRadius * cos(theta * i)), (a_fOuterRadius * sin(theta * i)), a_fHeight / 2);
+		bottomLeftPtTC = vector3((a_fInnerRadius * cos(theta * (i + 1))), (a_fInnerRadius * sin(theta * (i + 1))), a_fHeight / 2);
+		topLeftPtTC = vector3((a_fOuterRadius * cos(theta * (i + 1))), (a_fOuterRadius * sin(theta * (i + 1))), a_fHeight / 2);
+		topRightPtTC = vector3((a_fInnerRadius * cos(theta * i)), (a_fInnerRadius * sin(theta * i)), a_fHeight / 2);
+
+		AddTri(bottomLeftPtTC, bottomRightPtTC, topLeftPtTC);
+		AddTri(bottomRightPtTC, bottomLeftPtTC, topRightPtTC);
+
+
+		AddQuad(bottomRightPtBC, topLeftPtBC, bottomRightPtTC, topLeftPtTC);
+		AddQuad(bottomLeftPtBC, topRightPtBC, bottomLeftPtTC, topRightPtTC);
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
@@ -386,9 +472,76 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
-	// -------------------------------
+   /* 
+	* Using the following formulas to calculate the verticies
+	* x = (r*cos(PHI) * cos(THETA)),
+	* y = (r*cos(PHI) * sin(THETA)),
+	* z = r*sin(PHI), where
+	* THETA = 2PI * (longitudeStep / # of subdivisions) and
+	* PHI = (PI / 2) - (PI * (latitudeStep / # of subdivisions)
+	*
+	*/
+
+	std::vector<vector3> vertices;
+
+	float x, y, z;
+	float xy;
+	
+	float theta; // sector angle
+	float phi; // stack angle
+
+	float longitudeStep = PI / a_nSubdivisions;
+	float latitudeStep = (2 * PI) / a_nSubdivisions;
+
+	for (int i = 0; i <= a_nSubdivisions + 1; i++) 
+	{
+		phi = (PI / 2) - (i * longitudeStep);
+		xy = a_fRadius * cosf(phi);
+		z = a_fRadius * sinf(phi);
+
+		for (int j = 0; j <= a_nSubdivisions; j++) 
+		{
+			theta = j * latitudeStep;
+
+			x = xy * cosf(theta);
+			y = xy * sinf(theta);
+			vertices.push_back(vector3(x, y, z));
+		}
+	}
+
+	//Generating the triangles
+	int vIndex1, vIndex2;
+
+	for (int i = 0; i < a_nSubdivisions; i++) 
+	{
+		vIndex1 = i * (a_nSubdivisions + 1);
+		vIndex2 = vIndex1 + a_nSubdivisions + 1;
+
+		for (int j = 0; j < a_nSubdivisions; j++) 
+		{
+			vIndex1++;
+			vIndex2++;
+
+			//2 Triangles per quad
+			if (i == a_nSubdivisions - 1)
+			{
+				if (i != 0)
+					AddTri(vertices[vIndex1], vertices[vIndex2], vertices[vIndex1 - a_nSubdivisions]);
+				if (i != (a_nSubdivisions - 1))
+					AddTri(vertices[vIndex1 - a_nSubdivisions], vertices[vIndex2], vertices[vIndex2 -a_nSubdivisions]);
+			}
+			else 
+			{
+				if (i != 0)
+					AddTri(vertices[vIndex1], vertices[vIndex2], vertices[vIndex1 + 1]);
+
+				if (i != (a_nSubdivisions - 1))
+					AddTri(vertices[vIndex1 + 1], vertices[vIndex2], vertices[vIndex2 + 1]);
+			}
+		}
+		
+
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
