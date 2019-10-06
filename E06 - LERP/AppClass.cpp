@@ -2,7 +2,7 @@
 void Application::InitVariables(void)
 {
 	//Change this to your name and email
-	m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
+	m_sProgrammer = "Brody Davison - bbd4327@rit.edu";
 
 	//Set the position and target of the camera
 	m_pCameraMngr->SetPositionTargetAndUp(vector3(5.0f,3.0f,15.0f), ZERO_V3, AXIS_Y);
@@ -26,6 +26,7 @@ void Application::InitVariables(void)
 	m_stopsList.push_back(vector3(5.0f, 2.0f, -5.0f));
 
 	m_stopsList.push_back(vector3(1.0f, 3.0f, -5.0f));
+
 }
 void Application::Update(void)
 {
@@ -51,15 +52,26 @@ void Application::Display(void)
 	static uint uClock = m_pSystem->GenClock(); //generate a new clock for that timer
 	fTimer += m_pSystem->GetDeltaTime(uClock); //get the delta time for that timer
 
-	//calculate the current position
-	vector3 v3CurrentPos;
+	static int currentStop = 0;
 	
+	vector3 currentStopPosition = m_stopsList[currentStop];
+	vector3 nextStopPosition = m_stopsList[(currentStop + 1) % m_stopsList.size()];
 
 
+	float timeBetweenStops = 2.5f;
+	float progressBetweenStops = MapValue(fTimer, 0.0f, timeBetweenStops, 0.0f, 1.0f);
 
+	//calculate the current position
+	vector3 v3CurrentPos = glm::lerp(currentStopPosition, nextStopPosition, progressBetweenStops);
+	
+	//Switches to the next stop in the route
+	if (progressBetweenStops >= 1.0f)
+	{
+		currentStop++; //go to the next stop in the route
+		fTimer = m_pSystem->GetDeltaTime(uClock); //restart the clock
+		currentStop %= m_stopsList.size(); //This prevents the stop tracker from causing index out of bounds errors and reroute the character from the last stop to the first
+	}
 
-	//your code goes here
-	v3CurrentPos = vector3(0.0f, 0.0f, 0.0f);
 	//-------------------
 	
 
