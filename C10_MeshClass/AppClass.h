@@ -9,14 +9,19 @@ Date: 2017/05
 
 #include "ControllerConfiguration.h"
 #include "imgui\ImGuiObject.h"
+#include <iostream>
+#include <vector>
 
 #include "MyMesh.h"
+ 
+using namespace std;
 
 class Application
 {
 	MyMesh* m_pMesh = nullptr;
 	MyMesh* m_pMesh1 = nullptr;
-
+	vector<vector3> cubePositions;
+	vector3 movementStep;
 	String m_sProgrammer = "Brody Davison - bbd4327@rit.edu";
 private:
 	static ImGuiObject gui; //GUI object
