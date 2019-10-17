@@ -2,7 +2,7 @@
 void Application::InitVariables(void)
 {
 	//Change this to your name and email
-	m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
+	m_sProgrammer = "Brody Davison - bbd4327@rit.edu";
 	
 	//Set the position and target of the camera
 	//(I'm at [0,0,10], looking at [0,0,0] and up is the positive Y axis)
@@ -38,6 +38,23 @@ void Application::InitVariables(void)
 		m_shapeList.push_back(m_pMeshMngr->GenerateTorus(fSize, fSize - 0.1f, 3, i, v3Color)); //generate a custom torus and add it to the meshmanager
 		fSize += 0.5f; //increment the size for the next orbit
 		uColor -= static_cast<uint>(decrements); //decrease the wavelength
+
+		//Storing coordinates for each orbit (i use fSize for the radius)
+		std::vector<vector3> coordinates;
+		
+		float radius = fSize - 0.7f;
+		int subDivs = i; //start at 3 divs and add 1 per outer orbit
+		float theta = (PI * 2.0f) / subDivs;
+
+		for (int i = 0; i < subDivs; i++) 
+		{
+			coordinates.push_back(vector3((radius * cos(theta * i)), (radius * sin(theta * i)), 0));
+		}
+		orbitVerticies.push_back(coordinates);
+		//Sets up a progress tracker for each orbit
+		orbProgressTracker.push_back(0);
+		fTimer.push_back(0.0f);
+		uClock.push_back(m_pSystem->GenClock());
 	}
 }
 void Application::Update(void)
@@ -64,19 +81,41 @@ void Application::Display(void)
 	*/
 	//m4Offset = glm::rotate(IDENTITY_M4, 1.5708f, AXIS_Z);
 
+	
+
 	// draw a shapes
 	for (uint i = 0; i < m_uOrbits; ++i)
 	{
 		m_pMeshMngr->AddMeshToRenderList(m_shapeList[i], glm::rotate(m4Offset, 1.5708f, AXIS_X));
-
 		//calculate the current position
-		vector3 v3CurrentPos = ZERO_V3;
+		
+		//Interpolating over time
+		fTimer[i] += m_pSystem->GetDeltaTime(uClock[i]); //get the delta time for that timer
+
+		std::vector<vector3> currentOrbit = orbitVerticies[i];
+
+		vector3 currentVertex = currentOrbit[orbProgressTracker[i]];
+		vector3 nextVertex = currentOrbit[(orbProgressTracker[i] + 1) % orbitVerticies[i].size()];
+
+		float timeBetweenStops = 1.0f;
+		float progressBetweenStops = MapValue(fTimer[i], 0.0f, timeBetweenStops, 0.0f, 1.0f);
+
+		vector3 v3CurrentPos = glm::lerp(currentVertex, nextVertex, progressBetweenStops);
+
+		if (progressBetweenStops >= 1.0f)
+		{
+			orbProgressTracker[i]++; //go to the next stop in the route
+			fTimer[i] = m_pSystem->GetDeltaTime(uClock[i]); //restart the clock
+			orbProgressTracker[i] %= currentOrbit.size(); //This prevents the stop tracker from causing index out of bounds errors and reroute the character from the last stop to the first
+		}
+
 		matrix4 m4Model = glm::translate(m4Offset, v3CurrentPos);
 
 		//draw spheres
 		m_pMeshMngr->AddSphereToRenderList(m4Model * glm::scale(vector3(0.1)), C_WHITE);
 	}
-
+	
+	
 	//render list call
 	m_uRenderCallCount = m_pMeshMngr->Render();
 
