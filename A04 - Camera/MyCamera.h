@@ -211,6 +211,9 @@ public:
 	OUTPUT: ---
 	*/
 	void CalculateProjectionMatrix(void);
+
+	void ChangeYaw(float angle);
+	void ChangePitch(float angle);
 };
 
 } //namespace Simplex

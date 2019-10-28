@@ -248,15 +248,15 @@ void Camera::MoveSideways(float a_fDistance)
 }
 void Camera::ChangePitch(float a_fDegree)
 {
-	//Code removed for assignment purposes
+	m_v3PitchYawRoll = vector3(a_fDegree, m_v3PitchYawRoll.y, m_v3PitchYawRoll.z);
 }
 void Camera::ChangeYaw(float a_fDegree)
 {
-	//Code removed for assignment purposes
+	m_v3PitchYawRoll = vector3(m_v3PitchYawRoll.x, a_fDegree, m_v3PitchYawRoll.z);
 }
 void Camera::ChangeRoll(float a_fDegree)
 {
-	//Code removed for assignment purposes
+	m_v3PitchYawRoll = vector3(m_v3PitchYawRoll.x, m_v3PitchYawRoll.y, a_fDegree);
 }
 void Camera::SetPositionTargetAndUp(vector3 a_v3Position, vector3 a_v3Target, vector3 a_v3Upward)
 {

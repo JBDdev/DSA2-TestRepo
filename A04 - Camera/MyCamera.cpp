@@ -24,6 +24,10 @@ matrix4 Simplex::MyCamera::GetProjectionMatrix(void) { return m_m4Projection; }
 
 matrix4 Simplex::MyCamera::GetViewMatrix(void) { CalculateViewMatrix(); return m_m4View; }
 
+vector3 Simplex::MyCamera::GetPosition(void) { return m_v3Position; }
+vector3 Simplex::MyCamera::GetTarget(void) { return m_v3Target; }
+vector3 Simplex::MyCamera::GetUp(void) { return m_v3Above; }
+
 Simplex::MyCamera::MyCamera()
 {
 	Init(); //Init the object with default values
@@ -136,7 +140,7 @@ void Simplex::MyCamera::SetPositionTargetAndUp(vector3 a_v3Position, vector3 a_v
 void Simplex::MyCamera::CalculateViewMatrix(void)
 {
 	//Calculate the look at
-	m_m4View = glm::lookAt(m_v3Position, m_v3Target, m_v3Above);
+	m_m4View = glm::lookAt(m_v3Position, m_v3Target, m_v3Above-m_v3Position);
 }
 
 void Simplex::MyCamera::CalculateProjectionMatrix(void)
@@ -153,4 +157,47 @@ void Simplex::MyCamera::CalculateProjectionMatrix(void)
 										m_v2Vertical.x, m_v2Vertical.y, //vertical
 										m_v2NearFar.x, m_v2NearFar.y); //near and far
 	}
+}
+
+void Simplex::MyCamera::ChangeYaw(float angle)
+{
+	vector3 axisOfRotation = m_v3Above - m_v3Position;
+	quaternion rotation = glm::angleAxis(glm::radians(angle), axisOfRotation);
+	
+	vector3 u = vector3(rotation.x, rotation.y, rotation.z);
+	float s = rotation.w;
+
+	vector3 v = m_v3Target;
+
+	v = 2.0f * glm::dot(u, v) * u
+		+ (s*s - glm::dot(u, u)) * v
+		+ 2.0f * s * glm::cross(u, v);
+
+	m_v3Target = v;
+}
+
+void Simplex::MyCamera::ChangePitch(float angle)
+{
+	vector3 forward = m_v3Target - m_v3Position;
+	vector3 up = m_v3Above - m_v3Position;
+	vector3 right = glm::cross(forward, up);
+
+	quaternion rotation = glm::angleAxis(glm::radians(angle), right);
+
+	vector3 u = vector3(rotation.x, rotation.y, rotation.z);
+	float s = rotation.w;
+
+	vector3 t = m_v3Target;
+	vector3 v = m_v3Above;
+
+	t = 2.0f * glm::dot(u, t) * u
+		+ (s*s - glm::dot(u, u)) * t
+		+ 2.0f * s * glm::cross(u, t);
+
+	v = 2.0f * glm::dot(u, v) * u
+		+ (s*s - glm::dot(u, u)) * v
+		+ 2.0f * s * glm::cross(u, v);
+
+	m_v3Target = t;
+	m_v3Above = v;
 }

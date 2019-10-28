@@ -1,5 +1,8 @@
 #include "AppClass.h"
+#include "MyCamera.h"
+#include <iostream>
 using namespace Simplex;
+using namespace std;
 //Mouse
 void Application::ProcessMouseMovement(sf::Event a_event)
 {
@@ -27,6 +30,7 @@ void Application::ProcessMousePressed(sf::Event a_event)
 	case sf::Mouse::Button::Right:
 		gui.m_bMousePressed[2] = true;
 		m_bFPC = true;
+		cout << "I'm rclick" << endl;
 		break;
 	}
 
@@ -369,6 +373,8 @@ void Application::CameraRotation(float a_fSpeed)
 		fAngleX += fDeltaMouse * a_fSpeed;
 	}
 	//Change the Yaw and the Pitch of the camera
+	m_pCamera->ChangeYaw(fAngleY * 0.5f);
+	m_pCamera->ChangePitch(-fAngleX * 0.5f);
 	SetCursorPos(CenterX, CenterY);//Position the mouse in the center
 }
 //Keyboard
@@ -385,9 +391,67 @@ void Application::ProcessKeyboard(void)
 
 	if (fMultiplier)
 		fSpeed *= 5.0f;
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+	{
+		vector3 forward = m_pCamera->GetTarget() - m_pCamera->GetPosition();
+		m_pCamera->SetPosition(m_pCamera->GetPosition() + (fSpeed * forward));
+		m_pCamera->SetTarget(m_pCamera->GetTarget() + (fSpeed * forward));
+		m_pCamera->SetUp(m_pCamera->GetUp() + (fSpeed * forward));
+	}
+		
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+	{
+		vector3 forward = m_pCamera->GetTarget() - m_pCamera->GetPosition();
+		m_pCamera->SetPosition(m_pCamera->GetPosition() - (fSpeed * forward));
+		m_pCamera->SetTarget(m_pCamera->GetTarget() - (fSpeed * forward));
+		m_pCamera->SetUp(m_pCamera->GetUp() - (fSpeed * forward));
+	}
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+	{
+		/*cPos = vector3(cPos.x - fSpeed, cPos.y, cPos.z);
+		m_pCamera->SetPositionTargetAndUp(cPos, vector3(cPos.x, cPos.y, cPos.z - 1));*/
+		vector3 forward = m_pCamera->GetTarget() - m_pCamera->GetPosition();
+		vector3 up = m_pCamera->GetUp() - m_pCamera->GetPosition();
+
+		vector3 left = glm::cross(up, forward);
+
+		m_pCamera->SetPosition(m_pCamera->GetPosition() + (fSpeed * left));
+		m_pCamera->SetTarget(m_pCamera->GetTarget() + (fSpeed * left));
+	}
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+	{
+		vector3 forward = m_pCamera->GetTarget() - m_pCamera->GetPosition();
+		vector3 up = m_pCamera->GetUp() - m_pCamera->GetPosition();
+
+		vector3 right = glm::cross(forward, up);
+
+		m_pCamera->SetPosition(m_pCamera->GetPosition() + (fSpeed * right));
+		m_pCamera->SetTarget(m_pCamera->GetTarget() + (fSpeed * right));
+		m_pCamera->SetUp(m_pCamera->GetUp() + (fSpeed * right));
+	}
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+	{
+		vector3 up = m_pCamera->GetUp() - m_pCamera->GetPosition();
+		m_pCamera->SetPosition(m_pCamera->GetPosition() + (fSpeed * up));
+		m_pCamera->SetTarget(m_pCamera->GetTarget() + (fSpeed * up));
+		m_pCamera->SetUp(m_pCamera->GetUp() + (fSpeed * up));
+	}
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+	{
+		vector3 down = m_pCamera->GetUp() - m_pCamera->GetPosition();
+		m_pCamera->SetPosition(m_pCamera->GetPosition() - (fSpeed * down));
+		m_pCamera->SetTarget(m_pCamera->GetTarget() - (fSpeed * down));
+		m_pCamera->SetUp(m_pCamera->GetUp() - (fSpeed * down));
+	}
 #pragma endregion
+
 }
-//Joystick
+///Joystick
 void Application::ProcessJoystick(void)
 {
 	/*
