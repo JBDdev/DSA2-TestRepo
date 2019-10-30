@@ -180,7 +180,7 @@ void Simplex::MyCamera::ChangePitch(float angle)
 {
 	vector3 forward = m_v3Target - m_v3Position;
 	vector3 up = m_v3Above - m_v3Position;
-	vector3 right = glm::cross(forward, up);
+	vector3 right = glm::cross(up, forward);
 
 	quaternion rotation = glm::angleAxis(glm::radians(angle), right);
 
@@ -199,5 +199,5 @@ void Simplex::MyCamera::ChangePitch(float angle)
 		+ 2.0f * s * glm::cross(u, v);
 
 	m_v3Target = t;
-	m_v3Above = v;
+	//m_v3Above = v;
 }
