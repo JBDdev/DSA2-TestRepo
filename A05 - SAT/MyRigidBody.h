@@ -6,7 +6,9 @@ Date: 2017/06
 #define __MYRIGIDBODY_H_
 
 #include "Simplex\Simplex.h"
+#include <iostream>
 
+using namespace std;
 namespace Simplex
 {
 

@@ -287,120 +287,78 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	(eSATResults::SAT_NONE has a value of 0)
 	*/
 
-	vector3 v3Corner[8];
-	vector3 v3CornerOther[8];
-	//Get the points of this rigid body 
-	v3Corner[0] = m_v3MinL;
-	v3Corner[1] = vector3(m_v3MaxL.x, m_v3MinL.y, m_v3MinL.z);
-	v3Corner[2] = vector3(m_v3MinL.x, m_v3MaxL.y, m_v3MinL.z);
-	v3Corner[3] = vector3(m_v3MaxL.x, m_v3MaxL.y, m_v3MinL.z);
-
-	//Front rect
-	v3Corner[4] = vector3(m_v3MinL.x, m_v3MinL.y, m_v3MaxL.z);
-	v3Corner[5] = vector3(m_v3MaxL.x, m_v3MinL.y, m_v3MaxL.z);
-	v3Corner[6] = vector3(m_v3MinL.x, m_v3MaxL.y, m_v3MaxL.z);
-	v3Corner[7] = m_v3MaxL;
-
-	//Get Points of the other rigid body
-	v3CornerOther[0] = a_pOther->GetMinLocal();
-	v3CornerOther[1] = vector3(a_pOther->GetMaxLocal().x, a_pOther->GetMinLocal().y, a_pOther->GetMinLocal().z);
-	v3CornerOther[2] = vector3(a_pOther->GetMinLocal().x, a_pOther->GetMaxLocal().y, a_pOther->GetMinLocal().z);
-	v3CornerOther[3] = vector3(a_pOther->GetMaxLocal().x, a_pOther->GetMaxLocal().y, a_pOther->GetMinLocal().z);
-
-	//Front rect
-	v3CornerOther[4] = vector3(a_pOther->GetMinLocal().x, a_pOther->GetMinLocal().y, a_pOther->GetMaxLocal().z);
-	v3CornerOther[5] = vector3(a_pOther->GetMaxLocal().x, a_pOther->GetMinLocal().y, a_pOther->GetMaxLocal().z);
-	v3CornerOther[6] = vector3(a_pOther->GetMinLocal().x, a_pOther->GetMaxLocal().y, a_pOther->GetMaxLocal().z);
-	v3CornerOther[7] = a_pOther->GetMaxLocal();
-
-	//Compare me against the other object
-	for (int i = 0; i < 8; i++) 
-	{
-		int a = (i + 1) % 8;
-		vector3 axisOfProjection = vector3(-(v3Corner[a].y - v3Corner[i].y), v3Corner[a].x - v3Corner[i].x, v3Corner[a].z - v3Corner[i].z);
-
-		//Find min and max points on the projection
-		float minP1 = 5000.0f;
-		float maxP1 = -5000.0f;
-
-		for (int m = 0; m < 8; m++) 
-		{
-			//dot calculation
-			float dot = (v3Corner[i].x * axisOfProjection.x + v3Corner[i].y * axisOfProjection.y + v3Corner[i].z * axisOfProjection.z);
-
-			if (dot < minP1)
-				minP1 = dot;
-			
-			if (dot > maxP1)
-				maxP1 = dot;
-		}
-
-		//Repeat the process for the other rigid body
-		float minP2 = INFINITY;
-		float maxP2 = -INFINITY;
-
-		for (int m = 0; m < 8; m++)
-		{
-			//dot calculation
-			float dot = (v3CornerOther[i].x * axisOfProjection.x + v3CornerOther[i].y * axisOfProjection.y + v3CornerOther[i].z * axisOfProjection.z);
-
-			if (dot < minP2)
-				minP2 = dot;
-
-			if (dot > maxP2)
-				maxP2 = dot;
-		}
-
-		if (!(maxP2 >= minP1 && maxP1 >= minP2))
-		{
-			return 1;
-		}
-	}
 	
-	//Compare the other object against me
-	for (int i = 0; i < 8; i++)
+
+	//Get local axes of me and the object im testing against
+	
+	vector<vector3> myAxes;
+	myAxes.push_back(vector3(m_m4ToWorld[0][0], m_m4ToWorld[1][0], m_m4ToWorld[2][0]));
+	myAxes.push_back(vector3(m_m4ToWorld[0][1], m_m4ToWorld[1][1], m_m4ToWorld[2][1]));
+	myAxes.push_back(vector3(m_m4ToWorld[0][2], m_m4ToWorld[1][2], m_m4ToWorld[2][2]));
+
+	matrix4 otherMMatrix = a_pOther->GetModelMatrix();
+	vector<vector3> otherAxes;
+
+	otherAxes.push_back(vector3(otherMMatrix[0][0], otherMMatrix[1][0], otherMMatrix[2][0]));
+	otherAxes.push_back(vector3(otherMMatrix[0][1], otherMMatrix[1][1], otherMMatrix[2][1]));
+	otherAxes.push_back(vector3(otherMMatrix[0][2], otherMMatrix[1][2], otherMMatrix[2][2]));
+
+	//Rotation Matrix expressing b in a's frame
+	matrix3 bR;
+	matrix3 absBR;
+
+	for (int i = 0; i < 3; i++) 
 	{
-		int a = (i + 1) % 8;
-		vector3 axisOfProjection = vector3(-(v3CornerOther[a].y - v3CornerOther[i].y), v3CornerOther[a].x - v3CornerOther[i].x, v3CornerOther[a].z - v3CornerOther[i].z);
-
-		//Find min and max points on the projection
-		float minP1 = INFINITY;
-		float maxP1 = -INFINITY;
-
-		for (int m = 0; m < 8; m++)
+		for (int j = 0; j < 3; j++)
 		{
-			//dot calculation
-			float dot = (v3CornerOther[i].x * axisOfProjection.x + v3CornerOther[i].y * axisOfProjection.y + v3CornerOther[i].z * axisOfProjection.z);
-
-			if (dot < minP1)
-				minP1 = dot;
-
-			if (dot > maxP1)
-				maxP1 = dot;
+			bR[i][j] = glm::dot(myAxes[i], otherAxes[j]);
 		}
+	}
 
-		//Repeat the process for the other rigid body
-		float minP2 = INFINITY;
-		float maxP2 = -INFINITY;
-
-		for (int m = 0; m < 8; m++)
+	//Common subexpressions & counteract arithmetic errors (used in the orange book)
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
 		{
-			//dot calculation
-			float dot = (v3Corner[i].x * axisOfProjection.x + v3Corner[i].y * axisOfProjection.y + v3Corner[i].z * axisOfProjection.z);
-
-			if (dot < minP2)
-				minP2 = dot;
-
-			if (dot > maxP2)
-				maxP2 = dot;
+			absBR[i][j] = glm::abs(bR[i][j]) + FLT_EPSILON;
 		}
+	}
 
-		if (!(maxP2 >= minP1 && maxP1 >= minP2))
+	//Translation from center of other object to me
+	vector3 v3Translation = a_pOther->GetCenterGlobal() - GetCenterGlobal();
+	v3Translation = vector3(glm::dot(v3Translation, myAxes[0]), glm::dot(v3Translation, myAxes[1]), glm::dot(v3Translation, myAxes[2]));
+	
+	float ra, rb;
+
+	vector3 otherHalfWidths = a_pOther->GetHalfWidth();
+
+	//Tests me against the other object
+	for (int i = 0; i < 3; i++) 
+	{
+		ra = GetHalfWidth()[i];
+		rb = otherHalfWidths[0] * absBR[i][0] + otherHalfWidths[1] * absBR[i][1] + otherHalfWidths[2] * absBR[i][2];
+
+		if (abs(v3Translation[i]) > ra + rb) 
 		{
 			return 1;
 		}
 	}
+
+	//Tests the other object against me
+	for (int i = 0; i < 3; i++) 
+	{
+		ra = GetHalfWidth()[0] * absBR[0][i] + GetHalfWidth()[1] * absBR[1][i] + GetHalfWidth()[2] * absBR[2][i];
+		rb = otherHalfWidths[i];
+
+		if (abs(v3Translation[0] * bR[0][i] + v3Translation[1] * bR[1][i] + v3Translation[2] * bR[2][i]) > ra + rb)
+		{
+			return 1;
+		}
+	}
+
+	
+
 	//there is no axis test that separates this two objects
 	return eSATResults::SAT_NONE;
-	//m_pMeshMngr->
+	
 }
