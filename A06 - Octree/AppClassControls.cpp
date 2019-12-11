@@ -125,27 +125,27 @@ void Application::ProcessKeyReleased(sf::Event a_event)
 			m_uOctantID = - 1;
 		
 		break;
-	case sf::Keyboard::Add:
+	case sf::Keyboard::LBracket:
 		if (m_uOctantLevels < 4)
 		{
+			cout << "Adding" << endl;
 			m_pEntityMngr->ClearDimensionSetAll();
 			m_uOctantLevels++;
 			
-			m_pRoot->~Octant();
-			m_pRoot = nullptr;
-			m_pRoot = new Octant(m_uOctantLevels, 5);
+			SafeDelete(m_pRoot);
+			m_pRoot = new MyOctant(m_uOctantLevels, 5);
 			
 		}
 		break;
-	case sf::Keyboard::Subtract:
+	case sf::Keyboard::RBracket:
 		if (m_uOctantLevels > 0)
 		{
+			cout << "Subtracting" << endl;
 			m_pEntityMngr->ClearDimensionSetAll();
 			m_uOctantLevels--;
 			
-			delete m_pRoot;
-			m_pRoot = nullptr;
-			m_pRoot = new Octant(m_uOctantLevels, 5);
+			SafeDelete(m_pRoot);
+			m_pRoot = new MyOctant(m_uOctantLevels, 5);
 			
 		}
 		break;

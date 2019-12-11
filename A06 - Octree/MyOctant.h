@@ -6,9 +6,9 @@
 
 using namespace std;
 
-namespace Simplex\
+namespace Simplex
 {
-	class Octant 
+	class MyOctant 
 	{
 		static int octantCount; //stores # of octants
 		static int maxLevel; //stores max level an octant can go to
@@ -27,27 +27,27 @@ namespace Simplex\
 		vector3 min = vector3(0.0f, 0.0f, 0.0f); //minimum point of the octant
 		vector3 max = vector3(0.0f, 0.0f, 0.0f); //maximum point of the octant
 
-		Octant* parent = nullptr; //the parent octant of this octant, if there is one
-		vector<Octant*> children; //stores the children of this octant, if they exist
+		MyOctant* parent = nullptr; //the parent octant of this octant, if there is one
+		vector<MyOctant*> children; //stores the children of this octant, if they exist
 
 		vector<int> entityList; //list of entities under the octant
 
-		Octant* rootOctant = nullptr; 
-		vector<Octant*> nodesWithChildren; //only applies to the root octant
+		MyOctant* rootOctant = nullptr; 
+		vector<MyOctant*> nodesWithChildren; //only applies to the root octant
 
 	public:
 
-		Octant(int maxLevel = 2, int idealEntityCount = 5);
+		MyOctant(int maxLevel = 2, int idealEntityCount = 5);
 
-		Octant(vector3 center, float size);
+		MyOctant(vector3 center, float size);
 
-		Octant(Octant const& other);
+		MyOctant(MyOctant const& other);
 
-		Octant& operator=(Octant const& other);
+		MyOctant& operator=(MyOctant const& other);
 
-		~Octant(void);
+		~MyOctant(void);
 
-		void Swap(Octant& other);
+		void Swap(MyOctant& other);
 
 		float GetSize(void);
 
@@ -69,9 +69,9 @@ namespace Simplex\
 
 		void Subdivide(void);
 
-		Octant* GetChild(int child);
+		MyOctant* GetChild(int child);
 
-		Octant* GetParent(void);
+		MyOctant* GetParent(void);
 
 		bool IsLeaf(void);
 

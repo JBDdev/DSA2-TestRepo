@@ -1,15 +1,15 @@
-#include "Octant.h"
+#include "MyOctant.h"
 using namespace Simplex;
 
-int Octant::octantCount = 0;
-int Octant::maxLevel = 3;
-int Octant::idealEntityCount = 5;
-int Octant::GetOctantCount(void) 
+int MyOctant::octantCount = 0;
+int MyOctant::maxLevel = 3;
+int MyOctant::idealEntityCount = 5;
+int MyOctant::GetOctantCount(void) 
 {
 	return octantCount;
 }
 
-void Octant::Init(void) 
+void MyOctant::Init(void) 
 {
 	numOfChildren = 0;
 
@@ -27,13 +27,10 @@ void Octant::Init(void)
 
 	rootOctant = nullptr;
 	parent = nullptr;
-	for (int i = 0; i < 8; i++) 
-	{
-		children[i] = NULL;
-	}
+	KillTheChildren();
 }
 
-void Octant::Swap(Octant& other) 
+void MyOctant::Swap(MyOctant& other) 
 {
 	swap(numOfChildren, other.numOfChildren);
 
@@ -58,12 +55,12 @@ void Octant::Swap(Octant& other)
 	}
 }
 
-Octant* Octant::GetParent(void)
+MyOctant* MyOctant::GetParent(void)
 {
 	return parent;
 }
 
-void Octant::Release(void) 
+void MyOctant::Release(void) 
 {
 	if (octantLevel == 0) //Kills the branches if this is the root octant
 	{
@@ -77,7 +74,7 @@ void Octant::Release(void)
 	
 }
 
-Octant::Octant(int maximumLevel, int idealEntityNum)
+MyOctant::MyOctant(int maximumLevel, int idealEntityNum)
 {
 	Init();
 
@@ -124,7 +121,7 @@ Octant::Octant(int maximumLevel, int idealEntityNum)
 	ConstructTree(maxLevel);
 }
 
-Octant::Octant(vector3 centerPt, float size) 
+MyOctant::MyOctant(vector3 centerPt, float size) 
 {
 	Init();
 
@@ -137,7 +134,7 @@ Octant::Octant(vector3 centerPt, float size)
 	octantCount++;
 }
 
-Octant::Octant(Octant const& other) 
+MyOctant::MyOctant(MyOctant const& other) 
 {
 	numOfChildren = other.numOfChildren;
 	center = other.center;
@@ -162,44 +159,44 @@ Octant::Octant(Octant const& other)
 
 }
 
-Octant& Octant::operator=(Octant const& other) 
+MyOctant& MyOctant::operator=(MyOctant const& other) 
 {
 	if (this != &other)
 	{
 		Release();
 		Init();
-		Octant temp(other);
+		MyOctant temp(other);
 		Swap(temp);
 	}
 	return *this;
 }
 
-Octant::~Octant() 
+MyOctant::~MyOctant() 
 {
 	Release();
 }
 
-float Octant::GetSize(void)
+float MyOctant::GetSize(void)
 {
 	return octantSize;
 }
 
-vector3 Octant::GetCenterGlobal(void) 
+vector3 MyOctant::GetCenterGlobal(void) 
 {
 	return center;
 }
 
-vector3 Octant::GetMinGlobal(void) 
+vector3 MyOctant::GetMinGlobal(void) 
 {
 	return min;
 }
 
-vector3 Octant::GetMaxGlobal(void)
+vector3 MyOctant::GetMaxGlobal(void)
 {
 	return max;
 }
 
-void Octant::Display(int index, vector3 color) 
+void MyOctant::Display(int index, vector3 color) 
 {
 	if (octantID == index) 
 	{
@@ -213,7 +210,7 @@ void Octant::Display(int index, vector3 color)
 	}
 }
 
-void Octant::Display(vector3 color) 
+void MyOctant::Display(vector3 color) 
 {
 	for (int i = 0; i < numOfChildren; i++) 
 	{
@@ -224,7 +221,7 @@ void Octant::Display(vector3 color)
 
 }
 
-void Octant::Subdivide(void) 
+void MyOctant::Subdivide(void) 
 {
 	if (octantLevel >= maxLevel) 
 	{
@@ -247,28 +244,28 @@ void Octant::Subdivide(void)
 	v3Center.y -= newSize;
 	v3Center.z -= newSize;
 
-	children[0] = new Octant(v3Center, newSizeD);
+	children.push_back(new MyOctant(v3Center, newSizeD));
 
 	v3Center.x += newSizeD;
-	children[1] = new Octant(v3Center, newSizeD);
+	children.push_back(new MyOctant(v3Center, newSizeD));
 
 	v3Center.z += newSizeD;
-	children[2] = new Octant(v3Center, newSizeD);
+	children.push_back(new MyOctant(v3Center, newSizeD));
 
 	v3Center.x -= newSizeD;
-	children[3] = new Octant(v3Center, newSizeD);
+	children.push_back(new MyOctant(v3Center, newSizeD));
 
 	v3Center.y += newSizeD;
-	children[4] = new Octant(v3Center, newSizeD);
+	children.push_back(new MyOctant(v3Center, newSizeD));
 
 	v3Center.z -= newSizeD;
-	children[5] = new Octant(v3Center, newSizeD);
+	children.push_back(new MyOctant(v3Center, newSizeD));
 
 	v3Center.x += newSizeD;
-	children[6] = new Octant(v3Center, newSizeD);
+	children.push_back(new MyOctant(v3Center, newSizeD));
 
 	v3Center.z += newSizeD;
-	children[7] = new Octant(v3Center, newSizeD);
+	children.push_back(new MyOctant(v3Center, newSizeD));
 
 	for (int i = 0; i < 8; i++) 
 	{
@@ -283,7 +280,7 @@ void Octant::Subdivide(void)
 	}
 }
 
-Octant* Octant::GetChild(int child) 
+MyOctant* MyOctant::GetChild(int child) 
 {
 	if (child > 7) 
 	{
@@ -292,7 +289,7 @@ Octant* Octant::GetChild(int child)
 	return children[child];
 }
 
-bool Octant::IsColliding(int rbIndex) 
+bool MyOctant::IsColliding(int rbIndex) 
 {
 	int objectCount = m_pEntityMngr->GetEntityCount();
 
@@ -326,7 +323,7 @@ bool Octant::IsColliding(int rbIndex)
 
 }
 
-bool Octant::IsLeaf(void) 
+bool MyOctant::IsLeaf(void) 
 {
 	if (numOfChildren == 0) 
 	{
@@ -336,7 +333,7 @@ bool Octant::IsLeaf(void)
 	return false;
 }
 
-bool Octant::ContainsMoreThan(int numEntities) 
+bool MyOctant::ContainsMoreThan(int numEntities) 
 {
 	int count = 0;
 	int objectCount = m_pEntityMngr->GetEntityCount();
@@ -357,7 +354,7 @@ bool Octant::ContainsMoreThan(int numEntities)
 	return false;
 }
 
-void Octant::KillBranches(void) 
+void MyOctant::KillBranches(void) 
 {
 	for (int i = 0; i < numOfChildren; i++) 
 	{
@@ -368,7 +365,7 @@ void Octant::KillBranches(void)
 	numOfChildren = 0;
 }
 
-void Octant::DisplayLeafs(vector3 color) 
+void MyOctant::DisplayLeafs(vector3 color) 
 {
 	for (int i = 0; i < numOfChildren; i++) 
 	{
@@ -377,7 +374,7 @@ void Octant::DisplayLeafs(vector3 color)
 	m_pMeshMngr->AddWireCubeToRenderList(glm::translate(IDENTITY_M4, center) * glm::scale(vector3(octantSize)), color, RENDER_WIRE);
 }
 
-void Octant::ClearEntityList(void) 
+void MyOctant::ClearEntityList(void) 
 {
 	for (int i = 0; i < numOfChildren; i++) 
 	{
@@ -386,7 +383,7 @@ void Octant::ClearEntityList(void)
 	entityList.clear();
 }
 
-void Octant::ConstructTree(int maximumLevel) 
+void MyOctant::ConstructTree(int maximumLevel) 
 {
 	if (octantLevel != 0) 
 	{
@@ -414,8 +411,13 @@ void Octant::ConstructTree(int maximumLevel)
 }
 
 
-void Octant::KillTheChildren() 
+void MyOctant::KillTheChildren() 
 {
+	if (numOfChildren == 0) 
+	{
+		return;
+	}
+
 	for (int i = 0; i < 8; i++)
 	{
 		delete children[i];
@@ -423,7 +425,7 @@ void Octant::KillTheChildren()
 	}
 }
 
-void Octant::AssignIDToEntity(void) 
+void MyOctant::AssignIDToEntity(void) 
 {
 	//This will run until a leaf node is found
 	for (int i = 0; i < numOfChildren; i++) 
@@ -447,7 +449,7 @@ void Octant::AssignIDToEntity(void)
 }
 
 
-void Octant::ConstructList(void) 
+void MyOctant::ConstructList(void) 
 {
 	for (int i = 0; i < numOfChildren; i++) 
 	{
