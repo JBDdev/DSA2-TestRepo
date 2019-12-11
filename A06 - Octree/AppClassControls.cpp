@@ -125,7 +125,7 @@ void Application::ProcessKeyReleased(sf::Event a_event)
 			m_uOctantID = - 1;
 		
 		break;
-	case sf::Keyboard::LBracket:
+	case sf::Keyboard::Add:
 		if (m_uOctantLevels < 4)
 		{
 			cout << "Adding" << endl;
@@ -137,7 +137,7 @@ void Application::ProcessKeyReleased(sf::Event a_event)
 			
 		}
 		break;
-	case sf::Keyboard::RBracket:
+	case sf::Keyboard::Subtract:
 		if (m_uOctantLevels > 0)
 		{
 			cout << "Subtracting" << endl;
